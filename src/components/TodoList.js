@@ -1,40 +1,40 @@
-import React, {Component} from 'react'
-import {connect} from 'react-redux'
-import {fetchTodos, toggleTodo, deleteTodo, getVisibleTodos} from '../reducers/todo'
+import React, {Component , useEffect, useState} from 'react'
+import {useSelector , useDispatch } from 'react-redux'
+import {fetchTodos, toggleTodo, deleteTodo} from '../reducers/todo'
 
-const TodoItem = ({id, title, completed,toggleTodo, deleteTodo}) => (
+const TodoItem = ({id, title, completed,toggleTodo, deleteTodo , dispatch}) => (
   <li>
     <span className='delete-item'>
-      <button onClick={() => deleteTodo(id)}>X</button>
+      <button onClick={() => dispatch(deleteTodo(id))}>X</button>
     </span>
     <input type="checkbox"
       checked={completed}
-      onChange={() => toggleTodo(id)} />
+      onChange={() => dispatch(toggleTodo(id))} />
     {title}
   </li>
 )
 
-class TodoList extends Component {
-  componentDidMount() {
-    this.props.fetchTodos()
-  }
+const TodoList = () => {
+  const dispatch= useDispatch()
 
-  render() {
-    return (
-      <div className="Todo-List">
-        <ul>
-          {this.props.todos.map(todo =>
-            <TodoItem key={todo.id}
-              toggleTodo={this.props.toggleTodo}
-              deleteTodo={this.props.deleteTodo}
-              {...todo} />)}
-        </ul>
-      </div>
-    )
-  }
+  useEffect(() => {
+    dispatch(fetchTodos())
+  },[])
+
+  const {todos} = useSelector(state => state.todo)
+  
+  return (
+    <div className="Todo-List">
+    <ul>
+      {todos.length > 0 && todos.map(todo =>
+        <TodoItem key={todo.id}
+          toggleTodo={toggleTodo}
+          deleteTodo={deleteTodo}
+          dispatch={dispatch}
+          {...todo} />)}
+    </ul>
+  </div>
+  )
 }
 
-export default connect(
-  (state) => ({todos: state.todo.todos}),
-  {fetchTodos, toggleTodo, deleteTodo}
-)(TodoList)
+export default TodoList
